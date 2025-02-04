@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import './To_do.css'
 import * as Yup from 'yup';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function To_do() {
 
@@ -25,7 +27,8 @@ function To_do() {
         if (taskname !='' && status != '') {
             let newtask = { id: Math.random(), title: taskname, status: status }
             settasks([...tasks, newtask])
-            
+            toast("ADDED");
+
             settaskname("")
         }
     }
@@ -34,6 +37,9 @@ function To_do() {
         for (var i = 0; i < tem.length; i++) {
             if (tem[i].id == id) {
                 tem.splice(i, 1)
+                toast("DELETED");
+
+                
                 break
             }
         }
@@ -44,6 +50,7 @@ function To_do() {
         for (var i = 0; i < tem.length; i++) {
             if (tem[i].id == id) {
                 tem[i].status = e
+                toast("STATUS_UPDATED");
             }
         }
         settasks(tem)
@@ -67,6 +74,7 @@ function To_do() {
             if (tem[i].id == id) {
                 tem[i].status = status
                 tem[i].title = taskname
+                toast("EDITED");
                 setid('')
                 settaskname("")
             }
@@ -74,16 +82,17 @@ function To_do() {
         settasks(tem)
     }
 
-
+    
     return (
         <div className='main'>
             <h1>TO-DO-LIST</h1>
+            <ToastContainer />
             <form onSubmit={handlesubmit} >
                 <div>
                     <label>
                         Task:<input type='text' value={taskname} onChange={(e) => settaskname(e.target.value, id)} />
                         
-                        {error}
+                        
                     </label>
                 </div>
                 <div>
