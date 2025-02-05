@@ -8,28 +8,41 @@ function To_do() {
 
     const [taskname, settaskname] = useState('')
     const [tasks, settasks] = useState([])
-    const [status, setstatus] = useState('incomplete')
+    const [status, setstatus] = useState('')
 
     const validationSchema = Yup.object().shape({
-        taskname: Yup.string().min(10, "Must be at least 10 characters").required('Task name is required'),
-        status: Yup.string().required("Status is required"),
+        taskname: Yup.string()
+            .min(10, "Task name must be at least 10 characters")
+            .required("Task name is required"),
+        status: Yup.string()
+            .oneOf(["Completed", "incomplete"], "Select the status")
+            .required("Status is required"),
     })
+    const [message, setmessage] = useState()
     const handlesubmit = async (e) => {
         e.preventDefault()
-        let formdata = {
-            taskname: e.target.value,
-            status:e.target.value
-        }
-        const isvalid =await validationSchema.isValid(formdata)
-        
-       
+        try {
+            // const validity = await validationSchema.isValid({ taskname, status })
+            // console.log(validity)
 
-        if (taskname !='' && status != '') {
-            let newtask = { id: Math.random(), title: taskname, status: status }
-            settasks([...tasks, newtask])
-            toast("ADDED");
+            await validationSchema.validate({ taskname, status }, { abortEarly: false })
+            console.log(validationSchema)
 
-            settaskname("")
+            if (taskname != '' && status != '') {
+                let newtask = { id: Math.random(), title: taskname, status: status }
+                settasks([...tasks, newtask])
+                toast("ADDED");
+                settaskname("")
+            }
+        } catch (err) {
+            // err.errors.map((error) => {
+            //     toast.error(error)
+            // });
+            setmessage(err.errors.map((error) => (`${error},`)))
+            console.log(err.errors)
+
+            
+            
         }
     }
     const handledelete = (id) => {
@@ -38,9 +51,7 @@ function To_do() {
             if (tem[i].id == id) {
                 tem.splice(i, 1)
                 toast("DELETED");
-
-                
-                break
+                break;
             }
         }
         settasks(tem)
@@ -82,7 +93,7 @@ function To_do() {
         settasks(tem)
     }
 
-    
+
     return (
         <div className='main'>
             <h1>TO-DO-LIST</h1>
@@ -91,8 +102,6 @@ function To_do() {
                 <div>
                     <label>
                         Task:<input type='text' value={taskname} onChange={(e) => settaskname(e.target.value, id)} />
-                        
-                        
                     </label>
                 </div>
                 <div>
@@ -101,6 +110,9 @@ function To_do() {
                         <option value='Completed'>Completed</option>
                         <option value='incomplete'>Incomplete</option>
                     </select>
+                </div>
+                <div>
+                    <span id='error'>{message}</span>
                 </div>
                 <div>
                     {id ? <button onClick={() => handleUpdate(id)}>UPDATE</button> : <button type='submit' value='submit'>Submit</button>}
